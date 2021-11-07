@@ -1,6 +1,6 @@
 // main.js
 
-import { Router } from './router.js';
+import { Router } from './Router.js';
 
 const recipes = [
   'https://introweb.tech/assets/json/ghostCookies.json',
@@ -25,6 +25,8 @@ const router = new Router(function () {
    * This will only be two single lines
    * If you did this right, you should see the recipe cards just like last lab
    */
+   document.querySelector('.section--recipe-cards').classList.add('shown');
+   document.querySelector('.section--recipe-expand').classList.remove('shown');
 });
 
 window.addEventListener('DOMContentLoaded', init);
@@ -117,6 +119,21 @@ function createRecipeCards() {
    * all the recipes. (bonus - add the class 'hidden' to every recipe card with 
    * an index greater  than 2 in your for loop to make show more button functional)
    */
+  for(let i = 1; i < recipes.length; i++) {
+    const newRecipeCard = document.createElement('recipe-card');
+    newRecipeCard.data = recipeData[recipes[i]];
+    const newPage = recipeData[recipes[i]]['page-name'];
+    if(i > 2) {
+      newRecipeCard.classList.add('hidden');
+    } 
+    router.addPage(newPage, function() {
+      document.querySelector('.section--recipe-cards').classList.remove('shown');
+      document.querySelector('.section--recipe-expand').classList.add('shown');
+      document.querySelector('recipe-expand').data = recipeData[recipes[i]];
+    });
+    bindRecipeCard(newRecipeCard, newPage);
+    document.querySelector('.recipe-cards--wrapper').appendChild(newRecipeCard); 
+  }
 }
 
 /**
@@ -172,6 +189,11 @@ function bindEscKey() {
    * if the escape key is pressed, use your router to navigate() to the 'home'
    * page. This will let us go back to the home page from the detailed page.
    */
+  document.addEventListener('keydown', (event) =>  {
+    router.navigate('home', false);
+    //window.history.back();
+  });
+  
 }
 
 /**
@@ -193,4 +215,16 @@ function bindPopstate() {
    * so your navigate() function does not add your going back action to the history,
    * creating an infinite loop
    */
+  window.addEventListener('popstate', (event) => {
+    if(window.location.hash == event.state) {
+      router.navigate(event.state, true);
+    }
+    else if(!(event.state)){
+      router.navigate('home', true);
+    }
+    else {
+      router.navigate(event.state, true);
+    }
+   
+  });
 }
